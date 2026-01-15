@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pathfinding Visualizer</title>
+    <link rel="stylesheet" href="src/css/styles.css">
+</head>
+<body>
+    <!-- loading screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="container" style="display: none;">
+        <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">
+            <span class="menu-icon hamburger-icon">
+                <span></span>
+                <span></span>
+                <span></span>
+            </span>
+            <span class="menu-icon close-icon">
+                <span></span>
+                <span></span>
+            </span>
+        </button>
+        
+        <!-- Stats Section at Top -->
+        <div class="stats-container">
+            <h3 class="stats-title">STATS</h3>
+            <div class="stats-grid-top">
+                <div class="stat-item-top">
+                    <span class="stat-label-top">VISITED</span>
+                    <span id="stat-visited" class="stat-value-top">0</span>
+                </div>
+                <div class="stat-item-top">
+                    <span class="stat-label-top">PATH LENGTH</span>
+                    <span id="stat-path" class="stat-value-top">0</span>
+                </div>
+                <div class="stat-item-top">
+                    <span class="stat-label-top">TIME</span>
+                    <span id="stat-time" class="stat-value-top">0ms</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-panel" id="control-panel">
+            <div class="controls-section">
+                <h3>Pathfinding Algorithm</h3>
+                <select id="pathfinding-algo" class="select-dropdown">
+                    <option value="bfs">BFS</option>
+                    <option value="dfs">DFS</option>
+                    <option value="dijkstra">Dijkstra</option>
+                    <option value="greedy">Greedy Best-First</option>
+                    <option value="astar">A*</option>
+                    <option value="swarm">Swarm</option>
+                    <option value="convergent-swarm">Convergent Swarm</option>
+                    <option value="bidirectional">Bidirectional Search</option>
+                    <option value="bidirectional-swarm">Bidirectional Swarm</option>
+                </select>
+                <select id="heuristic-type" class="select-dropdown" style="margin-top: 10px;">
+                    <option value="manhattan">Manhattan</option>
+                    <option value="euclidean">Euclidean</option>
+                    <option value="chebyshev">Chebyshev</option>
+                </select>
+                <div class="button-group" style="margin-top: 10px;">
+                    <button id="btn-run" class="btn btn-primary" style="flex: 1;">Run Algorithm</button>
+                    <button id="btn-stop" class="btn btn-secondary" style="flex: 1;">Stop</button>
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <h3>Maze Algorithm</h3>
+                <select id="maze-algo" class="select-dropdown">
+                    <option value="recursive-division">Recursive Division</option>
+                    <option value="recursive-division-vertical">Recursive Division (Vertical Skew)</option>
+                    <option value="recursive-division-horizontal">Recursive Division (Horizontal Skew)</option>
+                    <option value="prims">Prims</option>
+                    <option value="kruskal">Kruskal</option>
+                    <option value="recursive-backtracking">Recursive Backtracking</option>
+                    <option value="wilson">Wilson</option>
+                    <option value="ellers">Ellers</option>
+                    <option value="side-winder">Side Winder</option>
+                    <option value="binary-tree">Binary Tree</option>
+                    <option value="labyrinth">Labyrinth</option>
+                    <option value="basic-random">Random</option>
+                    <option value="weighted-maze">Weighted Maze</option>
+                </select>
+                <button id="btn-maze" class="btn btn-secondary" style="margin-top: 10px; width: 100%;">Generate Maze</button>
+            </div>
+
+            <div class="controls-section">
+                <h3>Speed</h3>
+                <select id="speed-select" class="select-dropdown">
+                    <option value="0.5x">0.5x</option>
+                    <option value="1x" selected>1x</option>
+                    <option value="2x">2x</option>
+                    <option value="4x">4x</option>
+                    <option value="8x">8x</option>
+                </select>
+            </div>
+
+            <div class="controls-section">
+                <h3>Weights</h3>
+                <button id="btn-add-weights" class="btn btn-secondary" style="width: 100%;">Add Random Weights</button>
+                <button id="btn-clear-weights" class="btn btn-secondary" style="margin-top: 10px; width: 100%;">Clear Weights</button>
+            </div>
+
+            <div class="controls-section">
+                <h3>Controls</h3>
+                <div class="button-group">
+                    <button id="btn-clear" class="btn btn-secondary">Clear Path</button>
+                    <button id="btn-reset" class="btn btn-secondary">Reset Grid</button>
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <h3>Legend</h3>
+                <div class="legend-list">
+                    <div class="legend-item">
+                        <div class="legend-color legend-start"></div>
+                        <span class="legend-label">Start</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-end"></div>
+                        <span class="legend-label">End</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-visited"></div>
+                        <span class="legend-label">Visited</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-path"></div>
+                        <span class="legend-label">Path</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-wall"></div>
+                        <span class="legend-label">Wall</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-empty"></div>
+                        <span class="legend-label">Empty</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-weight-2"></div>
+                        <span class="legend-label">Weight 2</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-weight-3"></div>
+                        <span class="legend-label">Weight 3</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-weight-4"></div>
+                        <span class="legend-label">Weight 4</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-weight-5"></div>
+                        <span class="legend-label">Weight 5</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-weight-15"></div>
+                        <span class="legend-label">Weight 15 (Maze)</span>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div id="notification" class="notification hidden">
+                <span class="notification-icon">⚠</span>
+                <span class="notification-text">No path found!</span>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <div id="grid" class="grid"></div>
+        </div>
+        
+        <!-- info panel -->
+        <div class="info-panel" id="info-panel">
+            <div class="info-panel-header">
+                <h2>Algorithm Guide</h2>
+                <button class="info-panel-close" id="info-panel-close">×</button>
+            </div>
+            <div class="info-panel-content">
+                <div class="info-section">
+                    <h3>Pathfinding Algorithms</h3>
+                    <div class="info-item">
+                        <strong>BFS (Breadth-First Search)</strong>
+                        <p>Explores all neighbors at current depth before next level. Guarantees shortest path in unweighted graphs.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(V + E)</code>
+                            <span class="formula-label">Space:</span> <code>O(V)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>DFS (Depth-First Search)</strong>
+                        <p>Explores as far as possible along each branch before backtracking. Does not guarantee shortest path.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(V + E)</code>
+                            <span class="formula-label">Space:</span> <code>O(V)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Dijkstra</strong>
+                        <p>Finds shortest path in weighted graphs by exploring nodes with smallest distance first. Guarantees optimal solution.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O((V + E) log V)</code>
+                            <span class="formula-label">Space:</span> <code>O(V)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Greedy Best-First</strong>
+                        <p>Uses heuristic to always explore the node closest to the goal. Fast but doesn't guarantee shortest path.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(V log V)</code>
+                            <span class="formula-label">Space:</span> <code>O(V)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>A*</strong>
+                        <p>Combines Dijkstra's optimality with heuristic guidance. Guarantees shortest path and is very efficient.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Formula:</span> <code>f(n) = g(n) + h(n)</code>
+                            <div class="formula-explanation">
+                                <span>g(n) = cost from start</span>
+                                <span>h(n) = heuristic to goal</span>
+                            </div>
+                            <span class="formula-label">Time:</span> <code>O(b<sup>d</sup>)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Swarm</strong>
+                        <p>Balances Dijkstra's exploration with A* convergence. Explores more nodes around start while converging to goal.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Formula:</span> <code>s(n) = 0.6g(n) + 0.4h(n)</code>
+                            <span class="formula-label">Time:</span> <code>O(b<sup>d</sup>)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Convergent Swarm</strong>
+                        <p>Faster version of Swarm with heavier heuristic weighting. Converges quickly but may not find optimal path.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Formula:</span> <code>s(n) = 0.3g(n) + 0.7h(n)</code>
+                            <span class="formula-label">Time:</span> <code>O(b<sup>d</sup>)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Bidirectional Search</strong>
+                        <p>Searches from both start and end simultaneously until paths meet. Often faster than unidirectional search.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(b<sup>d/2</sup>)</code>
+                            <span class="formula-label">Space:</span> <code>O(b<sup>d/2</sup>)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Bidirectional Swarm</strong>
+                        <p>Swarm algorithm searching from both start and end simultaneously. Combines swarm balance with bidirectional speed.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(b<sup>d/2</sup>)</code>
+                            <span class="formula-label">Space:</span> <code>O(b<sup>d/2</sup>)</code>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Heuristics</h3>
+                    <div class="info-item">
+                        <strong>Manhattan Distance</strong>
+                        <p>Sum of horizontal and vertical distances. Good for grid-based pathfinding with 4-directional movement.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Formula:</span>
+                            <code>h(n) = |x₁ - x₂| + |y₁ - y₂|</code>
+                            <div class="formula-example">
+                                Example: (2,3) to (5,7) = |2-5| + |3-7| = 3 + 4 = 7
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Euclidean Distance</strong>
+                        <p>Straight-line distance between two points. More accurate but slightly slower to compute.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Formula:</span>
+                            <code>h(n) = √[(x₁ - x₂)² + (y₁ - y₂)²]</code>
+                            <div class="formula-example">
+                                Example: (2,3) to (5,7) = √[(2-5)² + (3-7)²] = √[9 + 16] = 5
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Chebyshev Distance</strong>
+                        <p>Maximum of horizontal and vertical distances. Useful for 8-directional movement (including diagonals).</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Formula:</span>
+                            <code>h(n) = max(|x₁ - x₂|, |y₁ - y₂|)</code>
+                            <div class="formula-example">
+                                Example: (2,3) to (5,7) = max(|2-5|, |3-7|) = max(3, 4) = 4
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="notation-legend">
+                    <h4>Notation Guide</h4>
+                    <div class="notation-item"><code>V</code> = Vertices (nodes)</div>
+                    <div class="notation-item"><code>E</code> = Edges (connections)</div>
+                    <div class="notation-item"><code>n</code> = Number of cells</div>
+                    <div class="notation-item"><code>b</code> = Branching factor</div>
+                    <div class="notation-item"><code>d</code> = Depth of solution</div>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Weights</h3>
+                    <div class="info-item">
+                        <strong>Node Weights</strong>
+                        <p>Weights represent the cost of traversing a node. Higher weights make paths more expensive, causing algorithms to prefer lower-weight routes when possible. Weights range from 1 (default) to 5, with higher numbers indicating more costly paths.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Cost Calculation:</span> <code>total_cost = previous_cost + node_weight</code>
+                        </div>
+                        <div class="formula-explanation">
+                            <span>• Weight 1: Normal cost (default for all nodes)</span>
+                            <span>• Weight 2-5: Higher cost paths (shown in yellow to red)</span>
+                            <span>• Algorithms like Dijkstra and A* will avoid high-weight paths when a lower-weight alternative exists</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Maze Generation</h3>
+                    <div class="info-item">
+                        <strong>Recursive Division</strong>
+                        <p>Creates a perfect maze by recursively dividing the grid into smaller sections with random walls and passages.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(n log n)</code>
+                            <span class="formula-label">Space:</span> <code>O(log n)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Recursive Division (Vertical Skew)</strong>
+                        <p>Similar to Recursive Division but prefers vertical divisions, creating taller maze sections.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(n log n)</code>
+                            <span class="formula-label">Bias:</span> <code>Vertical > Horizontal</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Recursive Division (Horizontal Skew)</strong>
+                        <p>Similar to Recursive Division but prefers horizontal divisions, creating wider maze sections.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(n log n)</code>
+                            <span class="formula-label">Bias:</span> <code>Horizontal > Vertical</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Basic Random Maze</strong>
+                        <p>Generates a random maze by placing walls randomly across 25% of the grid cells.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(n)</code>
+                            <span class="formula-label">Wall Density:</span> <code>25%</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Prims</strong>
+                        <p>Uses Prim's algorithm to generate a minimum spanning tree maze. Starts from a random cell and grows by adding random frontier cells.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(n log n)</code>
+                            <span class="formula-label">Space:</span> <code>O(n)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Kruskal</strong>
+                        <p>Uses Kruskal's algorithm with union-find to generate a maze. Randomly removes walls between cells in different sets.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(n log n)</code>
+                            <span class="formula-label">Space:</span> <code>O(n)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Recursive Backtracking</strong>
+                        <p>Uses depth-first search with backtracking. Carves paths by randomly choosing unvisited neighbors and backtracks when stuck.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(n)</code>
+                            <span class="formula-label">Space:</span> <code>O(n)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Wilson</strong>
+                        <p>Uses Wilson's algorithm with loop-erased random walks. Randomly walks from unvisited cells until hitting the maze, then adds the path.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(n log n)</code>
+                            <span class="formula-label">Space:</span> <code>O(n)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Ellers</strong>
+                        <p>Generates mazes row by row using union-find. Processes one row at a time, merging sets and creating passages.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(n)</code>
+                            <span class="formula-label">Space:</span> <code>O(cols)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Side Winder</strong>
+                        <p>Creates mazes by building horizontal runs and randomly carving north passages. Simple and efficient algorithm.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(n)</code>
+                            <span class="formula-label">Space:</span> <code>O(cols)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Binary Tree</strong>
+                        <p>Each cell randomly connects to either its north or east neighbor. Creates mazes with a clear bias toward one direction.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(n)</code>
+                            <span class="formula-label">Space:</span> <code>O(1)</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Labyrinth</strong>
+                        <p>Creates spiral-like patterns by carving walls in a circular pattern. Produces visually interesting maze structures.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(n)</code>
+                            <span class="formula-label">Pattern:</span> <code>Spiral</code>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <strong>Weighted Maze</strong>
+                        <p>Uses recursive division but places random weights instead of walls. Creates mazes suitable for weighted pathfinding algorithms.</p>
+                        <div class="info-formula">
+                            <span class="formula-label">Time:</span> <code>O(n log n)</code>
+                            <span class="formula-label">Weights:</span> <code>2-15</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- info panel toggle button -->
+        <button class="info-panel-toggle" id="info-panel-toggle" aria-label="Toggle info panel">
+            <span>ℹ</span>
+        </button>
+    </div>
+
+    <script>
+        // initialize DEBUG_PERF first
+        window.DEBUG_PERF = false;
+        
+        // track script loading
+        let scriptsLoaded = 0;
+        const totalScripts = 6;
+        
+        // simple loader controller
+        window.Loader = {
+            show: function() {
+                const loader = document.getElementById('loading-screen');
+                if (loader) {
+                    loader.classList.remove('hidden');
+                }
+            },
+            hide: function() {
+                const loader = document.getElementById('loading-screen');
+                if (loader) {
+                    loader.classList.add('hidden');
+                }
+            }
+        };
+        
+        function onScriptLoad() {
+            scriptsLoaded++;
+            if (scriptsLoaded === totalScripts) {
+                // all scripts loaded, wait for DOM and then initialize
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initializeApp);
+                } else {
+                    initializeApp();
+                }
+            }
+        }
+        
+        function initializeApp() {
+            // wait a bit for everything to settle
+            setTimeout(() => {
+                // check if all required classes are available
+                if (typeof Grid !== 'undefined' && 
+                    typeof AnimationController !== 'undefined' && 
+                    typeof MazeStepPlayer !== 'undefined' &&
+                    typeof PathfindingAlgorithms !== 'undefined') {
+                    
+                    // hide loader and show app
+                    showWelcome();
+                } else {
+                    console.error('Some classes not loaded:', {
+                        Grid: typeof Grid,
+                        AnimationController: typeof AnimationController,
+                        MazeStepPlayer: typeof MazeStepPlayer,
+                        PathfindingAlgorithms: typeof PathfindingAlgorithms
+                    });
+                    // retry after a bit
+                    setTimeout(initializeApp, 100);
+                }
+            }, 100);
+        }
+        
+        function showWelcome() {
+            const loadingScreen = document.getElementById('loading-screen');
+            
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+                const container = document.querySelector('.container');
+                container.style.display = 'flex';
+                
+                // initialize app
+                if (typeof init === 'function') {
+                    init();
+                }
+            }, 300);
+        }
+    </script>
+    <script src="src/js/grid.js" onload="onScriptLoad()" onerror="console.error('Failed to load grid.js')"></script>
+    <script src="src/js/grid-animations.js" onload="onScriptLoad()" onerror="console.error('Failed to load grid-animations.js')"></script>
+    <script src="src/js/maze.js" onload="onScriptLoad()" onerror="console.error('Failed to load maze.js')"></script>
+    <script src="src/js/algorithms.js" onload="onScriptLoad()" onerror="console.error('Failed to load algorithms.js')"></script>
+    <script src="src/js/animation.js" onload="onScriptLoad()" onerror="console.error('Failed to load animation.js')"></script>
+    <script src="src/js/app.js" onload="onScriptLoad()" onerror="console.error('Failed to load app.js')"></script>
+</body>
+</html>
